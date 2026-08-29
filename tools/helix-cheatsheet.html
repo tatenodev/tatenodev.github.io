@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helix Cheat Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0f1117;
+    --surface: #171922;
+    --surface-2: #1e212c;
+    --border: #2a2d3a;
+    --ink: #ece9e2;
+    --dim: #868aa0;
+    --dim-2: #5c5f70;
+
+    --nor: #5ea8d8;  /* Normal mode  */
+    --ins: #7cc49a;  /* Insert mode  */
+    --sel: #e3a85e;  /* Select mode  */
+    --cmd: #d6537d;  /* Command mode */
+    --mat: #a78bc7;  /* Match mode   */
+    --win: #5fbfb3;  /* Window mode  */
+
+    --radius: 6px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  kbd{
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 0.85em;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+    display: inline-block;
+    transition: transform 80ms ease, border-bottom-width 80ms ease, background 120ms ease;
+  }
+  kbd:hover{
+    transform: translateY(1px);
+    border-bottom-width: 1px;
+    background: var(--surface);
+  }
+
+  a{ color: inherit; }
+
+  /* ---------- layout ---------- */
+  .page{
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    min-height: 100vh;
+  }
+
+  .sidebar{
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 22px 18px 40px;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom: 18px;
+  }
+  .brand h1{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .brand .sub{
+    font-size: 0.7rem;
+    color: var(--dim);
+    font-family: 'JetBrains Mono', monospace;
+    display:block;
+    margin-top: 2px;
+  }
+
+  .helix-mark{ flex-shrink:0; }
+
+  .search-wrap{
+    position: relative;
+    margin-bottom: 18px;
+  }
+  .search-wrap::before{
+    content: ":";
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--dim-2);
+    font-weight: 700;
+  }
+  #search{
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    padding: 8px 10px 8px 22px;
+    outline: none;
+  }
+  #search:focus{ border-color: var(--dim-2); }
+  #search::placeholder{ color: var(--dim-2); }
+
+  .legend{
+    margin-bottom: 22px;
+  }
+  .legend-title, .nav-title{
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--dim-2);
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    width:100%;
+    background:none;
+    border:none;
+    color: var(--dim);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    padding: 5px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align:left;
+  }
+  .legend-item:hover{ background: var(--surface-2); color: var(--ink); }
+  .legend-item.active{ background: var(--surface-2); color: var(--ink); }
+  .dot{
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink:0;
+    box-shadow: 0 0 0 3px transparent;
+  }
+  .legend-item.active .dot{ box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 20%, transparent); }
+  .legend-key{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.68rem;
+    color: var(--dim-2);
+    margin-left:auto;
+  }
+
+  nav.toc a{
+    display:block;
+    text-decoration:none;
+    color: var(--dim);
+    font-size: 0.82rem;
+    padding: 5px 6px;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+  }
+  nav.toc a:hover{ color: var(--ink); background: var(--surface-2); }
+  nav.toc .num{
+    font-family:'JetBrains Mono', monospace;
+    color: var(--dim-2);
+    margin-right: 6px;
+  }
+
+  main.content{
+    padding: 30px 40px 100px;
+    max-width: 880px;
+  }
+
+  .top-note{
+    color: var(--dim);
+    font-size: 0.85rem;
+    margin: -4px 0 28px;
+    max-width: 60ch;
+  }
+  .top-note strong{ color: var(--ink); }
+
+  .chapter{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 22px;
+    overflow: hidden;
+    scroll-margin-top: 20px;
+  }
+  .chapter-head{
+    display:flex;
+    align-items:baseline;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    border-left: 3px solid var(--accent, var(--nor));
+  }
+  .chapter-head .num{
+    font-family:'JetBrains Mono', monospace;
+    color: var(--dim-2);
+    font-size: 0.85rem;
+  }
+  .chapter-head h2{
+    margin:0;
+    font-size: 1.02rem;
+    font-weight: 600;
+  }
+  .chapter-head .mode-tag{
+    margin-left:auto;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    font-weight:700;
+    letter-spacing:0.06em;
+    color: var(--accent, var(--nor));
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    padding: 2px 8px;
+  }
+
+  table.keytable{
+    width: 100%;
+    border-collapse: collapse;
+  }
+  table.keytable tr.row{
+    border-top: 1px solid var(--border);
+  }
+  table.keytable tr.row:first-child{ border-top: none; }
+  table.keytable td{
+    padding: 10px 20px;
+    vertical-align: top;
+  }
+  td.keys{
+    width: 40%;
+    white-space: nowrap;
+  }
+  td.keys .dot{
+    margin-right: 8px;
+  }
+  td.desc{
+    color: var(--dim);
+    font-size: 0.88rem;
+  }
+  td.desc .hint{
+    display:block;
+    color: var(--dim-2);
+    font-size: 0.8rem;
+    margin-top: 2px;
+  }
+
+  .row.is-hidden, .chapter.is-hidden{ display:none; }
+
+  footer{
+    color: var(--dim-2);
+    font-size: 0.78rem;
+    margin-top: 30px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* mobile */
+  @media (max-width: 860px){
+    .page{ grid-template-columns: 1fr; }
+    .sidebar{
+      position: relative;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    nav.toc{
+      display:flex;
+      gap: 4px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    nav.toc a{ white-space:nowrap; }
+    main.content{ padding: 24px 18px 80px; }
+  }
+
+  /* print */
+  @media print{
+    body{ background:#fff; color:#111; }
+    .sidebar{ display:none; }
+    .page{ display:block; }
+    .chapter{ break-inside: avoid; border-color:#ccc; background:#fff; }
+    kbd{ background:#f0f0f0; color:#111; border-color:#ccc; }
+    td.desc{ color:#333; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="helix-mark" width="30" height="30" viewBox="0 0 30 30" fill="none">
+        <path d="M4 4 Q15 15 4 26" stroke="var(--nor)" stroke-width="2" fill="none"/>
+        <path d="M26 4 Q15 15 26 26" stroke="var(--ins)" stroke-width="2" fill="none"/>
+        <circle cx="4" cy="4" r="2" fill="var(--cmd)"/>
+        <circle cx="26" cy="4" r="2" fill="var(--sel)"/>
+        <circle cx="15" cy="15" r="2" fill="var(--mat)"/>
+        <circle cx="4" cy="26" r="2" fill="var(--win)"/>
+        <circle cx="26" cy="26" r="2" fill="var(--nor)"/>
+      </svg>
+      <div>
+        <h1>Helix</h1>
+        <span class="sub">cheat sheet</span>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <input id="search" type="text" placeholder="search keys or actions" autocomplete="off">
+    </div>
+
+    <div class="legend">
+      <p class="legend-title">Modes — click to filter</p>
+      <button class="legend-item" data-mode="nor" style="color:var(--nor)"><span class="dot" style="background:var(--nor)"></span>Normal<span class="legend-key">default</span></button>
+      <button class="legend-item" data-mode="ins" style="color:var(--ins)"><span class="dot" style="background:var(--ins)"></span>Insert<span class="legend-key">i a I A o O</span></button>
+      <button class="legend-item" data-mode="sel" style="color:var(--sel)"><span class="dot" style="background:var(--sel)"></span>Select<span class="legend-key">v</span></button>
+      <button class="legend-item" data-mode="cmd" style="color:var(--cmd)"><span class="dot" style="background:var(--cmd)"></span>Command<span class="legend-key">:</span></button>
+      <button class="legend-item" data-mode="mat" style="color:var(--mat)"><span class="dot" style="background:var(--mat)"></span>Match<span class="legend-key">m</span></button>
+      <button class="legend-item" data-mode="win" style="color:var(--win)"><span class="dot" style="background:var(--win)"></span>Window<span class="legend-key">Ctrl-w</span></button>
+    </div>
+
+    <nav class="toc">
+      <p class="nav-title">Chapters</p>
+      <a href="#ch1"><span class="num">01</span>Getting started</a>
+      <a href="#ch2"><span class="num">02</span>Insert mode</a>
+      <a href="#ch3"><span class="num">03</span>Motions &amp; selections</a>
+      <a href="#ch4"><span class="num">04</span>Undo, yank, search</a>
+      <a href="#ch5"><span class="num">05</span>Multiple cursors</a>
+      <a href="#ch6"><span class="num">06</span>Find &amp; replace char</a>
+      <a href="#ch7"><span class="num">07</span>Replace, join, indent</a>
+      <a href="#ch8"><span class="num">08</span>Registers &amp; macros</a>
+      <a href="#ch9"><span class="num">09</span>Jumplist &amp; labels</a>
+      <a href="#ch10"><span class="num">10</span>Cycling, case, split</a>
+      <a href="#ch11"><span class="num">11</span>Comments</a>
+      <a href="#ch12"><span class="num">12</span>Match mode</a>
+      <a href="#ch13"><span class="num">13</span>Windows &amp; splits</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <p class="top-note">Helix公式チュートリアル(<code>hx --tutor</code>)の内容をもとにした早見表です。色は押している/入るモードを表します — <strong>NOR</strong> Normal / <strong>INS</strong> Insert / <strong>SEL</strong> Select / <strong>CMD</strong> Command / <strong>MAT</strong> Match / <strong>WIN</strong> Window。左のモード名クリックで絞り込み、検索欄でキーや説明文からも検索できます。</p>
+
+    <section class="chapter" id="ch1" style="--accent:var(--cmd)">
+      <div class="chapter-head"><span class="num">01</span><h2>Getting Started</h2><span class="mode-tag">CMD</span></div>
+      <table class="keytable">
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd></td><td class="desc">カーソルを 左/下/上/右 に移動</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>d</kbd></td><td class="desc">カーソル位置の選択(文字)を削除</td></tr>
+        <tr class="row" data-mode="cmd"><td class="keys"><span class="dot" style="background:var(--cmd)"></span><kbd>:</kbd></td><td class="desc">コマンドモードに入る</td></tr>
+        <tr class="row" data-mode="cmd"><td class="keys"><span class="dot" style="background:var(--cmd)"></span><kbd>:q</kbd> / <kbd>:quit</kbd></td><td class="desc">終了(未保存の変更があると失敗する)<span class="hint">:q! / :quit! で変更を破棄して強制終了</span></td></tr>
+        <tr class="row" data-mode="cmd"><td class="keys"><span class="dot" style="background:var(--cmd)"></span><kbd>:w</kbd> / <kbd>:write</kbd></td><td class="desc">保存<span class="hint">:wq / :write-quit で保存して終了</span></td></tr>
+      </table>
+    </section>
+
+    <section class="chapter" id="ch2" style="--accent:var(--ins)">
+      <div class="chapter-head"><span class="num">02</span><h2>Insert Mode</h2><span class="mode-tag">INS</span></div>
+      <table class="keytable">
+        <tr class="row" data-mode="ins"><td class="keys"><span class="dot" style="background:var(--ins)"></span><kbd>i</kbd></td><td class="desc">選択の前からInsertモード</td></tr>
+        <tr class="row" data-mode="ins"><td class="keys"><span class="dot" style="background:var(--ins)"></span><kbd>a</kbd></td><td class="desc">選択の後からInsertモード(append)</td></tr>
+        <tr class="row" data-mode="ins"><td class="keys"><span class="dot" style="background:var(--ins)"></span><kbd>I</kbd></td><td class="desc">行頭(最初の非空白文字)からInsertモード</td></tr>
+        <tr class="row" data-mode="ins"><td class="keys"><span class="dot" style="background:var(--ins)"></span><kbd>A</kbd></td><td class="desc">行末からInsertモード</td></tr>
+        <tr class="row" data-mode="ins"><td class="keys"><span class="dot" style="background:var(--ins)"></span><kbd>o</kbd></td><td class="desc">下に新規行を開いてInsertモード</td></tr>
+        <tr class="row" data-mode="ins"><td class="keys"><span class="dot" style="background:var(--ins)"></span><kbd>O</kbd></td><td class="desc">上に新規行を開いてInsertモード</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Esc</kbd></td><td class="desc">Normalモードに戻る</td></tr>
+      </table>
+    </section>
+
+    <section class="chapter" id="ch3" style="--accent:var(--nor)">
+      <div class="chapter-head"><span class="num">03</span><h2>Motions &amp; Selections</h2><span class="mode-tag">NOR</span></div>
+      <table class="keytable">
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>w</kbd></td><td class="desc">次の単語の先頭まで選択</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>e</kbd></td><td class="desc">単語の末尾まで選択</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>b</kbd></td><td class="desc">単語の先頭まで後方選択</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>W</kbd> <kbd>E</kbd> <kbd>B</kbd></td><td class="desc">同上、ただし空白区切りのWORD単位<span class="hint">記号混じりの単語も1つとして扱う</span></td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>c</kbd></td><td class="desc">選択を変更(削除してInsertモードへ)</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>2w</kbd> <kbd>3e</kbd> …</td><td class="desc">移動の前に数字を付けてn回繰り返す</td></tr>
+        <tr class="row" data-mode="sel"><td class="keys"><span class="dot" style="background:var(--sel)"></span><kbd>v</kbd></td><td class="desc">Selectモードに入る(移動が選択を拡張)<span class="hint">v または Esc で抜ける</span></td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>x</kbd></td><td class="desc">現在行を選択、繰り返すと次の行も追加</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>X</kbd></td><td class="desc">行を選択(次行へは拡張しない)</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>;</kbd></td><td class="desc">選択を単一カーソルに折りたたむ</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Alt-;</kbd></td><td class="desc">選択のアンカーとカーソルを反転</td></tr>
+      </table>
+    </section>
+
+    <section class="chapter" id="ch4" style="--accent:var(--nor)">
+      <div class="chapter-head"><span class="num">04</span><h2>Undo, Yank/Paste, Search</h2><span class="mode-tag">NOR</span></div>
+      <table class="keytable">
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>u</kbd></td><td class="desc">アンドゥ</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>U</kbd></td><td class="desc">リドゥ</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>y</kbd></td><td class="desc">選択をヤンク(コピー)</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>p</kbd> / <kbd>P</kbd></td><td class="desc">選択の後/前に貼り付け<span class="hint">削除・変更した内容も自動でヤンクされる。汚したくないときは Alt-d / Alt-c</span></td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Space y</kbd> / <kbd>Space p</kbd></td><td class="desc">システムクリップボードでヤンク/貼り付け</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>/</kbd> / <kbd>?</kbd></td><td class="desc">前方/後方検索(正規表現対応)</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>n</kbd> / <kbd>N</kbd></td><td class="desc">次/前の一致へ移動</td></tr>
+      </table>
+    </section>
+
+    <section class="chapter" id="ch5" style="--accent:var(--nor)">
+      <div class="chapter-head"><span class="num">05</span><h2>Multiple Cursors &amp; Select Command</h2><span class="mode-tag">NOR</span></div>
+      <table class="keytable">
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>C</kbd></td><td class="desc">選択(カーソル)を次の行にコピーして追加</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Alt-C</kbd></td><td class="desc">選択(カーソル)を前の行にコピーして追加</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>,</kbd></td><td class="desc">プライマリ選択だけを残す</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>s</kbd></td><td class="desc">選択内で正規表現にマッチする箇所を選択<span class="hint">検索置換をしたいときは % で全選択してから s</span></td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>&amp;</kbd></td><td class="desc">選択を列として整列(align)</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Alt-s</kbd></td><td class="desc">選択を改行ごとに分割</td></tr>
+      </table>
+    </section>
+
+    <section class="chapter" id="ch6" style="--accent:var(--nor)">
+      <div class="chapter-head"><span class="num">06</span><h2>Find &amp; Replace Character, Repetition</h2><span class="mode-tag">NOR</span></div>
+      <table class="keytable">
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>f</kbd>&lt;ch&gt;</td><td class="desc">その文字を含めて選択(find)</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>t</kbd>&lt;ch&gt;</td><td class="desc">その文字の手前まで選択(till)</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>F</kbd> / <kbd>T</kbd></td><td class="desc">同上、後方方向<span class="hint">Vimと違い現在行に限定されない</span></td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>r</kbd>&lt;ch&gt;</td><td class="desc">選択中の文字をchに置換</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>.</kbd></td><td class="desc">直前の挿入操作を繰り返す</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Alt-.</kbd></td><td class="desc">直前の f / t 選択を繰り返す</td></tr>
+      </table>
+    </section>
+
+    <section class="chapter" id="ch7" style="--accent:var(--nor)">
+      <div class="chapter-head"><span class="num">07</span><h2>Replace, Join, Indent, Increment</h2><span class="mode-tag">NOR</span></div>
+      <table class="keytable">
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>R</kbd></td><td class="desc">選択をヤンク済みテキストで置換</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>J</kbd></td><td class="desc">選択内の行を結合</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>&gt;</kbd> / <kbd>&lt;</kbd></td><td class="desc">選択をインデント/アンインデント</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Ctrl-a</kbd></td><td class="desc">選択中の数値をインクリメント</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Ctrl-x</kbd></td><td class="desc">選択中の数値をデクリメント</td></tr>
+      </table>
+    </section>
+
+    <section class="chapter" id="ch8" style="--accent:var(--nor)">
+      <div class="chapter-head"><span class="num">08</span><h2>Registers &amp; Macros</h2><span class="mode-tag">NOR</span></div>
+      <table class="keytable">
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>"</kbd>&lt;ch&gt;</td><td class="desc">ヤンク/貼り付け先のレジスタを選択</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Q</kbd></td><td class="desc">マクロの記録を開始/停止(既定レジスタ @)</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>q</kbd></td><td class="desc">マクロを再生</td></tr>
+      </table>
+    </section>
+
+    <section class="chapter" id="ch9" style="--accent:var(--nor)">
+      <div class="chapter-head"><span class="num">09</span><h2>Search Selections, Jumplist, Labels</h2><span class="mode-tag">NOR</span></div>
+      <table class="keytable">
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>*</kbd></td><td class="desc">選択を検索レジスタ(/)にコピー<span class="hint">"/y のショートハンド</span></td></tr>
+        <tr class="row" data-mode="sel"><td class="keys"><span class="dot" style="background:var(--sel)"></span><kbd>v</kbd> + <kbd>n</kbd>/<kbd>N</kbd></td><td class="desc">Selectモード中は一致箇所を選択に追加していく</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Ctrl-s</kbd></td><td class="desc">現在位置をジャンプリストに保存</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Ctrl-i</kbd> / <kbd>Ctrl-o</kbd></td><td class="desc">ジャンプリストを前方/後方へ移動</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>gw</kbd></td><td class="desc">各単語に2文字ラベルを表示してジャンプ</td></tr>
+      </table>
+    </section>
+
+    <section class="chapter" id="ch10" style="--accent:var(--nor)">
+      <div class="chapter-head"><span class="num">10</span><h2>Cycling Selections, Case, Split</h2><span class="mode-tag">NOR</span></div>
+      <table class="keytable">
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>)</kbd> / <kbd>(</kbd></td><td class="desc">プライマリ選択を前方/後方へ循環</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Alt-,</kbd></td><td class="desc">プライマリ選択を除外</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Alt-)</kbd> / <kbd>Alt-(</kbd></td><td class="desc">選択の中身を前方/後方へ循環(位置ではなく内容が入れ替わる)</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>~</kbd></td><td class="desc">選択の大文字/小文字を反転</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>`</kbd> / <kbd>Alt-`</kbd></td><td class="desc">選択を小文字化/大文字化</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>S</kbd></td><td class="desc">選択を正規表現で分割</td></tr>
+      </table>
+    </section>
+
+    <section class="chapter" id="ch11" style="--accent:var(--nor)">
+      <div class="chapter-head"><span class="num">11</span><h2>Comments</h2><span class="mode-tag">NOR</span></div>
+      <table class="keytable">
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Ctrl-c</kbd></td><td class="desc">選択/カーソル行のコメントをトグル<span class="hint">複数行選択・マルチカーソルにも対応</span></td></tr>
+      </table>
+    </section>
+
+    <section class="chapter" id="ch12" style="--accent:var(--mat)">
+      <div class="chapter-head"><span class="num">12</span><h2>Match Mode</h2><span class="mode-tag">MAT</span></div>
+      <table class="keytable">
+        <tr class="row" data-mode="mat"><td class="keys"><span class="dot" style="background:var(--mat)"></span><kbd>m</kbd></td><td class="desc">Match modeに入る</td></tr>
+        <tr class="row" data-mode="mat"><td class="keys"><span class="dot" style="background:var(--mat)"></span><kbd>mm</kbd></td><td class="desc">対応する括弧へジャンプ</td></tr>
+        <tr class="row" data-mode="mat"><td class="keys"><span class="dot" style="background:var(--mat)"></span><kbd>mi(</kbd> / <kbd>mi{</kbd> / <kbd>mi&quot;</kbd> …</td><td class="desc">括弧・引用符の内側を選択(区切り文字は含まない)</td></tr>
+        <tr class="row" data-mode="mat"><td class="keys"><span class="dot" style="background:var(--mat)"></span><kbd>ma(</kbd> …</td><td class="desc">括弧・引用符の外側を選択(区切り文字も含む)</td></tr>
+        <tr class="row" data-mode="mat"><td class="keys"><span class="dot" style="background:var(--mat)"></span><kbd>ms(</kbd> …</td><td class="desc">現在の選択を指定の区切り文字で囲む(surround)</td></tr>
+        <tr class="row" data-mode="mat"><td class="keys"><span class="dot" style="background:var(--mat)"></span><kbd>md(</kbd> …</td><td class="desc">周囲の区切り文字を削除</td></tr>
+        <tr class="row" data-mode="mat"><td class="keys"><span class="dot" style="background:var(--mat)"></span><kbd>mr([</kbd></td><td class="desc">周囲の区切り文字を別のものに置換(例: () → [])</td></tr>
+      </table>
+    </section>
+
+    <section class="chapter" id="ch13" style="--accent:var(--win)">
+      <div class="chapter-head"><span class="num">13</span><h2>Windows &amp; Splits</h2><span class="mode-tag">WIN</span></div>
+      <table class="keytable">
+        <tr class="row" data-mode="win"><td class="keys"><span class="dot" style="background:var(--win)"></span><kbd>Ctrl-w</kbd></td><td class="desc">Window modeに入る</td></tr>
+        <tr class="row" data-mode="win"><td class="keys"><span class="dot" style="background:var(--win)"></span><kbd>Ctrl-w v</kbd> / <kbd>Ctrl-w s</kbd></td><td class="desc">現在のバッファを垂直/水平に分割</td></tr>
+        <tr class="row" data-mode="win"><td class="keys"><span class="dot" style="background:var(--win)"></span><kbd>Ctrl-w nv</kbd> / <kbd>Ctrl-w ns</kbd></td><td class="desc">新規(空)バッファで垂直/水平分割</td></tr>
+        <tr class="row" data-mode="win"><td class="keys"><span class="dot" style="background:var(--win)"></span><kbd>Ctrl-w h/j/k/l</kbd></td><td class="desc">左/下/上/右の分割へ移動</td></tr>
+        <tr class="row" data-mode="win"><td class="keys"><span class="dot" style="background:var(--win)"></span><kbd>Ctrl-w w</kbd></td><td class="desc">次の分割へ移動</td></tr>
+        <tr class="row" data-mode="win"><td class="keys"><span class="dot" style="background:var(--win)"></span><kbd>Ctrl-w q</kbd> / <kbd>Ctrl-w o</kbd></td><td class="desc">現在の分割を閉じる / 他をすべて閉じる</td></tr>
+        <tr class="row" data-mode="win"><td class="keys"><span class="dot" style="background:var(--win)"></span><kbd>Ctrl-w t</kbd></td><td class="desc">隣接する分割の向きを入れ替え(transpose)</td></tr>
+        <tr class="row" data-mode="win"><td class="keys"><span class="dot" style="background:var(--win)"></span><kbd>Ctrl-w H/J/K/L</kbd></td><td class="desc">分割を左/下/上/右にスワップ</td></tr>
+        <tr class="row" data-mode="cmd"><td class="keys"><span class="dot" style="background:var(--cmd)"></span><kbd>:vs</kbd> [name] / <kbd>:hs</kbd> [name]</td><td class="desc">垂直/水平分割で開く(ファイル名指定可)</td></tr>
+        <tr class="row" data-mode="nor"><td class="keys"><span class="dot" style="background:var(--nor)"></span><kbd>Space f</kbd></td><td class="desc">ファイルピッカーを開く</td></tr>
+        <tr class="row" data-mode="win"><td class="keys"><span class="dot" style="background:var(--win)"></span><kbd>Ctrl-v</kbd> / <kbd>Ctrl-s</kbd></td><td class="desc">ピッカーで選択したファイルを垂直/水平分割で開く</td></tr>
+      </table>
+    </section>
+
+    <footer>Helix公式チュートリアル(<code>hx --tutor</code>)より作成。バージョンにより挙動が異なる場合があります。</footer>
+  </main>
+</div>
+
+<script>
+  const search = document.getElementById('search');
+  const rows = Array.from(document.querySelectorAll('tr.row'));
+  const chapters = Array.from(document.querySelectorAll('.chapter'));
+  const legendItems = Array.from(document.querySelectorAll('.legend-item'));
+  let activeMode = null;
+
+  function applyFilters(){
+    const q = search.value.trim().toLowerCase();
+
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      const modeOk = !activeMode || row.dataset.mode === activeMode;
+      const textOk = !q || text.includes(q);
+      row.classList.toggle('is-hidden', !(modeOk && textOk));
+    });
+
+    chapters.forEach(ch => {
+      const visibleRows = ch.querySelectorAll('tr.row:not(.is-hidden)');
+      ch.classList.toggle('is-hidden', visibleRows.length === 0);
+    });
+  }
+
+  search.addEventListener('input', applyFilters);
+
+  legendItems.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.mode;
+      if (activeMode === mode){
+        activeMode = null;
+        btn.classList.remove('active');
+      } else {
+        legendItems.forEach(b => b.classList.remove('active'));
+        activeMode = mode;
+        btn.classList.add('active');
+      }
+      applyFilters();
+    });
+  });
+</script>
+
+</body>
+</html>
