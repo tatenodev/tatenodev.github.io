@@ -1,0 +1,69 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build site with index
+        run: |
+          set -e
+          mkdir -p _site
+
+          # 対象のHTMLファイルを列挙(_site, .git, .github は除外)
+          FILES=$(find . -name "*.html" \
+            -not -path "./_site/*" \
+            -not -path "./.git/*" \
+            -not -path "./.github/*" | sort)
+
+          # HTMLファイルを_siteにコピー(フォルダ構造は維持)
+          for f in $FILES; do
+            mkdir -p "_site/$(dirname "$f")"
+            cp "$f" "_site/$f"
+          done
+
+          # index.htmlを生成
+          {
+            echo "<!DOCTYPE html><html lang=\"ja\"><head><meta charset=\"UTF-8\">"
+            echo "<title>ページ一覧</title>"
+            echo "<style>body{font-family:sans-serif;max-width:720px;margin:40px auto;padding:0 16px}"
+            echo "ul{line-height:2}a{text-decoration:none}a:hover{text-decoration:underline}</style>"
+            echo "</head><body><h1>ページ一覧</h1><ul>"
+            for f in $FILES; do
+              rel="${f#./}"
+              [ "$rel" = "index.html" ] && continue
+              title=$(grep -oP '(?<=<title>).*?(?=</title>)' "$f" | head -n1)
+              [ -z "$title" ] && title="$rel"
+              echo "<li><a href=\"$rel\">$title</a></li>"
+            done
+            echo "</ul></body></html>"
+          } > _site/index.html
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
