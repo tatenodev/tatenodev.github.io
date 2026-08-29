@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Herdr + yazi + Helix — 右パネル編集ワークフロー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #12151b;
+    --bg-panel: #1a1f28;
+    --bg-code: #0e1116;
+    --border: #2a3140;
+    --text: #e6e9f0;
+    --text-dim: #8d97a8;
+    --accent: #7fd8c4;
+    --accent-soft: rgba(127,216,196,0.12);
+    --warn: #e2b34f;
+    --warn-soft: rgba(226,179,79,0.1);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(127,216,196,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:56px 24px 120px;}
+
+  h1,h2,h3{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:-0.01em;}
+  h1{font-size:1.9rem;margin:0 0 8px;}
+  h2{font-size:1.15rem;margin:0 0 4px;color:var(--text);}
+  h3{font-size:0.95rem;margin:28px 0 10px;color:var(--accent);text-transform:none;}
+  p{color:var(--text-dim);margin:0 0 14px;}
+  a{color:var(--accent);}
+  code{font-family:'JetBrains Mono',monospace;font-size:0.85em;background:var(--bg-code);padding:1px 6px;border-radius:4px;color:#c9e8de;}
+
+  header{margin-bottom:8px;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:'JetBrains Mono',monospace;font-size:0.72rem;letter-spacing:0.08em;
+    color:var(--accent);text-transform:uppercase;margin-bottom:14px;
+  }
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;}
+  header p.lede{color:var(--text-dim);font-size:1rem;max-width:56ch;}
+
+  /* hero diagram */
+  .hero-diagram{
+    margin:28px 0 40px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:var(--bg-panel);
+    padding:18px 18px 14px;
+  }
+  .hero-diagram svg{display:block;width:100%;height:auto;}
+  .hero-caption{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text-dim);text-align:center;margin-top:10px;}
+
+  /* prereq chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 40px;}
+  .chip{
+    font-family:'JetBrains Mono',monospace;font-size:0.78rem;
+    border:1px solid var(--border);background:var(--bg-panel);
+    padding:6px 12px;border-radius:20px;color:var(--text);
+  }
+  .chip b{color:var(--accent);font-weight:600;}
+
+  nav.toc{
+    display:flex;gap:18px;flex-wrap:wrap;
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+    padding:14px 0;margin-bottom:44px;
+    font-family:'JetBrains Mono',monospace;font-size:0.78rem;
+  }
+  nav.toc a{color:var(--text-dim);text-decoration:none;}
+  nav.toc a:hover{color:var(--accent);}
+  nav.toc span{color:var(--border);}
+
+  section{margin-bottom:56px;}
+  .step-num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:22px;height:22px;border-radius:6px;
+    background:var(--accent-soft);color:var(--accent);
+    font-family:'JetBrains Mono',monospace;font-size:0.72rem;font-weight:700;
+    margin-right:8px;flex-shrink:0;
+  }
+
+  .card{
+    border:1px solid var(--border);
+    background:var(--bg-panel);
+    border-radius:10px;
+    padding:18px 20px;
+    margin:14px 0;
+  }
+  .card-title{
+    font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--text-dim);
+    margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;
+  }
+
+  pre{
+    margin:0;background:var(--bg-code);border:1px solid var(--border);
+    border-radius:8px;padding:14px 16px;overflow-x:auto;
+    position:relative;
+  }
+  pre code{background:none;padding:0;color:#d3e6df;font-size:0.82rem;line-height:1.6;white-space:pre;}
+  .code-block{position:relative;margin:12px 0;}
+  .copy-btn{
+    position:absolute;top:8px;right:8px;
+    font-family:'JetBrains Mono',monospace;font-size:0.68rem;
+    background:var(--bg-panel);color:var(--text-dim);
+    border:1px solid var(--border);border-radius:6px;
+    padding:4px 8px;cursor:pointer;transition:all .15s ease;
+  }
+  .copy-btn:hover{color:var(--accent);border-color:var(--accent);}
+  .copy-btn.copied{color:var(--accent);border-color:var(--accent);}
+
+  ol.steps{list-style:none;margin:0;padding:0;}
+  ol.steps li{display:flex;margin-bottom:12px;color:var(--text-dim);}
+  ol.steps li .body{padding-top:2px;}
+
+  ul.notes{margin:0;padding-left:0;list-style:none;}
+  ul.notes li{
+    position:relative;padding-left:20px;margin-bottom:12px;color:var(--text-dim);
+  }
+  ul.notes li::before{
+    content:"▸";position:absolute;left:0;color:var(--accent);
+  }
+
+  .callout{
+    border-left:3px solid var(--warn);
+    background:var(--warn-soft);
+    padding:12px 16px;border-radius:0 8px 8px 0;
+    font-size:0.9rem;color:#e9dcc0;margin:16px 0;
+  }
+  .callout b{color:var(--warn);}
+
+  .subgrid{display:grid;grid-template-columns:1fr;gap:18px;}
+  @media(min-width:640px){.subgrid.two{grid-template-columns:1fr 1fr;}}
+
+  footer{
+    border-top:1px solid var(--border);padding-top:20px;margin-top:60px;
+    font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text-dim);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">herdr / yazi / helix</div>
+    <h1>yaziで選んだファイルを、右パネルのhelixで開く</h1>
+    <p class="lede">Herdr上でyaziをファイルマネジャーとして使い、選択したファイルを右側に新しいパネルを開いてHelixで編集するための設定と、パネル幅の調整方法をまとめた自分用チートシート。</p>
+  </header>
+
+  <div class="hero-diagram">
+    <svg viewBox="0 0 640 190" xmlns="http://www.w3.org/2000/svg">
+      <rect x="8" y="10" width="330" height="170" rx="8" fill="#161b23" stroke="#2a3140"/>
+      <text x="24" y="34" fill="#8d97a8" font-family="JetBrains Mono, monospace" font-size="12">yazi</text>
+      <text x="24" y="60" fill="#e6e9f0" font-family="JetBrains Mono, monospace" font-size="12">notes.md</text>
+      <text x="24" y="80" fill="#7fd8c4" font-family="JetBrains Mono, monospace" font-size="12">▸ main.rs</text>
+      <text x="24" y="100" fill="#e6e9f0" font-family="JetBrains Mono, monospace" font-size="12">config.toml</text>
+
+      <g>
+        <rect x="270" y="78" width="40" height="24" rx="6" fill="#1a1f28" stroke="#7fd8c4"/>
+        <text x="290" y="94" fill="#7fd8c4" font-family="JetBrains Mono, monospace" font-size="12" text-anchor="middle">E</text>
+      </g>
+      <path d="M310 90 L360 90" stroke="#7fd8c4" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+      <rect x="360" y="10" width="272" height="170" rx="8" fill="#161b23" stroke="#7fd8c4" stroke-width="1.5"/>
+      <text x="376" y="34" fill="#7fd8c4" font-family="JetBrains Mono, monospace" font-size="12">helix — main.rs</text>
+      <text x="376" y="60" fill="#4a5568" font-family="JetBrains Mono, monospace" font-size="11">fn main() {</text>
+      <text x="392" y="78" fill="#4a5568" font-family="JetBrains Mono, monospace" font-size="11">println!("hi");</text>
+      <text x="376" y="96" fill="#4a5568" font-family="JetBrains Mono, monospace" font-size="11">}</text>
+      <text x="376" y="150" fill="#8d97a8" font-family="JetBrains Mono, monospace" font-size="11">:q  → パネルごと自動で閉じる</text>
+
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#7fd8c4"/>
+        </marker>
+      </defs>
+    </svg>
+    <div class="hero-caption">yaziでファイルにカーソル → E キー → 右に新パネルでhelixが開く → :q で閉じる</div>
+  </div>
+
+  <div class="chips">
+    <div class="chip">前提: <b>Herdr</b>(タブ/ペイン管理)</div>
+    <div class="chip"><b>yazi</b>(ファイルマネジャー)</div>
+    <div class="chip"><b>Helix</b>(<code>hx</code>コマンド)</div>
+    <div class="chip"><b>jq</b>(JSON解析)</div>
+  </div>
+
+  <nav class="toc">
+    <a href="#script">① スクリプト設定</a><span>/</span>
+    <a href="#mechanism">② 仕組みと注意点</a><span>/</span>
+    <a href="#width">③ パネル幅の調整</a>
+  </nav>
+
+  <section id="script">
+    <h2>① 右パネルでhelixを開く</h2>
+    <p>yaziの「選択ファイルを引数にシェルコマンドを実行する」機能と、Herdrのコア機能である <code>pane split</code> / <code>pane run</code> を組み合わせる。プラグイン(herdr-file-viewerなど)には依存しない。</p>
+
+    <div class="card">
+      <div class="card-title">
+        <span>~/.config/yazi/open-right.sh</span>
+      </div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        <pre><code>#!/usr/bin/env bash
+set -euo pipefail
+file="$1"
+
+# 呼び出し元(=yaziが動いているペイン)を右に分割
+resp=$(herdr pane split --current --direction right --ratio 0.6 --focus)
+pane_id=$(printf '%s' "$resp" | jq -r '.result.pane.pane_id')
+
+[ -n "$pane_id" ] && [ "$pane_id" != "null" ] || exit 1
+
+# 新ペインでhelixを起動し、終了したらペイン自体も閉じる
+herdr pane run "$pane_id" "hx $(printf '%q' "$file"); herdr pane close $pane_id"</code></pre>
+      </div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        <pre><code>chmod +x ~/.config/yazi/open-right.sh</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>~/.config/yazi/keymap.toml</span></div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        <pre><code>[[mgr.prepend_keymap]]
+on = "E"
+run = 'shell "~/.config/yazi/open-right.sh %h" --orphan'
+desc = "Open hovered file in Helix (Herdr split right)"</code></pre>
+      </div>
+    </div>
+
+    <h3>使い方</h3>
+    <ol class="steps">
+      <li><span class="step-num">1</span><span class="body">Herdrのペインで <code>yazi</code> を起動する</span></li>
+      <li><span class="step-num">2</span><span class="body">開きたいファイルにカーソルを合わせ、<code>E</code> を押す</span></li>
+      <li><span class="step-num">3</span><span class="body">右側に新パネルが開き、helixがそのファイルを編集する。yazi自体は左に残る</span></li>
+      <li><span class="step-num">4</span><span class="body">helix側で <code>:q</code>(または <code>:q!</code>)すると、右パネルごと自動的に消える</span></li>
+    </ol>
+  </section>
+
+  <section id="mechanism">
+    <h2>② 仕組みと注意点</h2>
+    <ul class="notes">
+      <li><b>herdr pane split --current --direction right</b> が、呼び出し元(yaziのペイン)を右に分割し、新しいペインIDをJSONで返す。Herdr本体のコア機能で、外部プラグイン不要。</li>
+      <li><b>herdr pane run &lt;pane_id&gt; "&lt;command&gt;"</b> が新ペインへコマンドを送信・実行する。</li>
+      <li>送るコマンドを <code>hx file; herdr pane close $pane_id</code> と <b>;</b> で連結しているのがポイント。<code>:q</code>でも <code>:q!</code>でも(終了コードに関わらず)後半の <code>pane close</code> が必ず実行され、パネルが自動で消える。</li>
+      <li><code>--current</code> は呼び出し元プロセスが継承している <code>HERDR_PANE_ID</code> を見て動くため、このスクリプトは<b>yaziが起動しているペインの中から呼ばれる必要がある</b>(yaziの<code>shell</code>アクション経由で実行されることが前提)。</li>
+      <li><code>jq</code> が必要(JSONレスポンスから <code>pane_id</code> を取り出すため)。無ければ <code>brew install jq</code> / <code>apt install jq</code> などで導入。</li>
+      <li>信頼性の観点から、<b>herdr-file-viewerのような小規模サードパーティプラグインは使わず</b>、実績のあるyazi本体の機能とHerdr公式CLIのみで構成している。</li>
+    </ul>
+  </section>
+
+  <section id="width">
+    <h2>③ パネルの幅を調整する</h2>
+
+    <div class="subgrid two">
+      <div>
+        <h3>A. スクリプトで固定比率を指定</h3>
+        <p><code>--ratio</code> は0〜1の小数で、<b>新しくできるパネルが全体の何割を占めるか</b>を指定する。</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+          <pre><code>herdr pane split --current \
+  --direction right \
+  --ratio 0.6 \
+  --focus</code></pre>
+        </div>
+        <p style="margin-top:10px;"><code>0.6</code> → helix側60% / yazi側40%。<code>0.5</code>で均等分割(省略時のデフォルト)。</p>
+      </div>
+
+      <div>
+        <h3>B. 開いた後にキーボードで調整</h3>
+        <p>Herdrのリサイズモードで手動調整できる(設定不要・デフォルト動作)。</p>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span class="body"><code>prefix</code>(既定 <code>ctrl+b</code>)→ <code>r</code> でリサイズモードへ</span></li>
+          <li><span class="step-num">2</span><span class="body">矢印キー(←↓↑→)で境界を移動</span></li>
+          <li><span class="step-num">3</span><span class="body"><code>Esc</code> でリサイズモードを抜ける</span></li>
+        </ol>
+      </div>
+    </div>
+
+    <h3>モードに入らず1キーで調整したい場合(任意)</h3>
+    <p>デフォルトでは未設定。設定するとtmuxのようにモード無しで連続リサイズできる。</p>
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      <pre><code>[keys]
+resize_pane_left = "ctrl+shift+alt+left"
+resize_pane_down = "ctrl+shift+alt+down"
+resize_pane_up = "ctrl+shift+alt+up"
+resize_pane_right = "ctrl+shift+alt+right"</code></pre>
+    </div>
+    <div class="callout">
+      <b>注意:</b> <code>ctrl+shift+alt+矢印</code> は環境によってOSやターミナル側のショートカットと衝突する可能性がある。設定前に自分の環境で空いているか確認する。
+    </div>
+  </section>
+
+  <footer>
+    herdr / yazi / helix ワークフロー・メモ — 新しいPCのセットアップ時や、同僚への共有用。
+  </footer>
+
+</div>
+
+<script>
+function copyCode(btn){
+  const pre = btn.nextElementSibling;
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const original = btn.textContent;
+    btn.textContent = 'copied';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.classList.remove('copied');
+    }, 1400);
+  });
+}
+</script>
+</body>
+</html>
