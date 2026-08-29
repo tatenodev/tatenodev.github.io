@@ -40,10 +40,10 @@ jobs:
           # index.htmlを生成
           {
             echo "<!DOCTYPE html><html lang=\"ja\"><head><meta charset=\"UTF-8\">"
-            echo "<title>ページ一覧</title>"
+            echo "<title>tatenodev.github.io</title>"
             echo "<style>body{font-family:sans-serif;max-width:720px;margin:40px auto;padding:0 16px}"
             echo "ul{line-height:2}a{text-decoration:none}a:hover{text-decoration:underline}</style>"
-            echo "</head><body><h1>ページ一覧</h1><ul>"
+            echo "</head><body><h1>tatenodev</h1><ul>"
             for f in $FILES; do
               rel="${f#./}"
               [ "$rel" = "index.html" ] && continue
