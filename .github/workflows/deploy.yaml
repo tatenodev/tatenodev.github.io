@@ -29,7 +29,7 @@ jobs:
           FILES=$(find . -name "*.html" \
             -not -path "./_site/*" \
             -not -path "./.git/*" \
-            -not -path "./.github/*" | sort)
+            -not -path "./.github/*" | sort -r)
 
           # HTMLファイルを_siteにコピー(フォルダ構造は維持)
           for f in $FILES; do
