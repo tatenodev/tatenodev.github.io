@@ -74,11 +74,15 @@
         <button class="copy-btn" data-copy-target="cfg-paths">コピー</button>
       </div>
       <pre id="cfg-paths">[keys.normal.space.l]
-r = ":sh printf '%s' '%{buffer_name}' | pbcopy"
-a = ":sh printf '%s' '%{file_path_absolute}' | pbcopy"
-n = ":sh printf '%s' \"$(basename '%{buffer_name}')\" | pbcopy"
-d = ":sh printf '%s' \"$(dirname '%{buffer_name}')\" | pbcopy"
-p = ":sh printf '%s:%s' '%{buffer_name}' '%{cursor_line}' | pbcopy"</pre>
+r = ":sh printf '%%s' '%{buffer_name}' | pbcopy"
+a = ":sh printf '%%s' '%{file_path_absolute}' | pbcopy"
+n = ":sh printf '%%s' \"$(basename '%{buffer_name}')\" | pbcopy"
+d = ":sh printf '%%s' \"$(dirname '%{buffer_name}')\" | pbcopy"
+p = ":sh printf '%%s:%%s' '%{buffer_name}' '%{cursor_line}' | pbcopy"</pre>
+    </div>
+
+    <div class="note">
+      <strong>補足：</strong>Helix は <code class="inline">%</code> の後ろに続く文字列を自分の展開構文（<code class="inline">%{...}</code> など）だと解釈しようとします。<code class="inline">printf</code> の書式指定子 <code class="inline">%s</code> のように、シェル側にそのまま渡したい <code class="inline">%</code> は <code class="inline">%%</code> と二重にしてエスケープする必要があります（<code class="inline">unknown expansion 's'</code> はこの衝突が原因のエラーです）。
     </div>
 
     <div class="card">
@@ -96,7 +100,7 @@ p = ":sh printf '%s:%s' '%{buffer_name}' '%{cursor_line}' | pbcopy"</pre>
     </div>
 
     <div class="note">
-      <strong>補足：</strong><code class="inline">%{file_path_absolute}</code> は比較的新しく追加された変数です（2025年11月マージ）。お使いの Helix が古い場合は、代わりに <code class="inline">:sh printf '%s' "$(realpath '%{buffer_name}')" | pbcopy</code> を使ってください（<code class="inline">realpath</code> は Windows 標準では使えません）。
+      <strong>補足：</strong><code class="inline">%{file_path_absolute}</code> は比較的新しく追加された変数です（2025年11月マージ）。お使いの Helix が古い場合は、代わりに <code class="inline">:sh printf '%%s' "$(realpath '%{buffer_name}')" | pbcopy</code> を使ってください（<code class="inline">realpath</code> は Windows 標準では使えません）。
     </div>
 
     <div class="note">
@@ -134,6 +138,10 @@ s = ":pipe-to (echo '%{buffer_name}:%{selection_line_start}-%{selection_line_end
     <div class="card">
       <h3>仕組み</h3>
       <p><code class="inline">echo</code> でパスと行範囲のヘッダー行を作り、続く <code class="inline">cat</code> が選択テキスト（標準入力）をそのまま流し込みます。両方の出力をまとめて <code class="inline">pbcopy</code> に渡すことで、ヘッダー付きのコードがクリップボードに入ります。</p>
+    </div>
+
+    <div class="note">
+      <strong>補足：</strong>この設定は <code class="inline">[keys.normal.space.l]</code> にしか登録していないため、<code class="inline">v</code> で入る Select（拡張）モードは別のキーマップ（<code class="inline">[keys.select]</code>）を参照しており、そのままでは反応しません。選択し終えたら <kbd>Esc</kbd> で Normal モードに戻ってから（選択範囲は保持されます）使ってください。Select モードのまま使いたい場合は、同じ内容を <code class="inline">[keys.select.space.l]</code> にも登録してください。
     </div>
 
     <div class="card">
