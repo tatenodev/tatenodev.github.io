@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helix — config.toml に追加する便利キーバインド</title>
+<style>
+  :root{
+    --bg: #1a1b20;
+    --surface: #212228;
+    --border: #34353d;
+    --text: #e8e6df;
+    --text-muted: #9b9ba3;
+    --accent: #a98fd2;
+    --accent-soft: rgba(169,143,210,0.14);
+    --accent-2: #6fb0a6;
+    --key-bg: #2c2d35;
+    --key-border: #3f4049;
+    --mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", sans-serif;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.75; -webkit-font-smoothing: antialiased; }
+  body{ padding: 56px 24px 96px; }
+  main{ max-width: 720px; margin: 0 auto; }
+  header{ margin-bottom: 48px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+  h1{ font-size: 1.6rem; font-weight: 650; margin: 0 0 12px; letter-spacing: -0.01em; }
+  header p{ color: var(--text-muted); font-size: 0.98rem; margin: 0; max-width: 60ch; }
+  h2{ font-size: 1.12rem; font-weight: 650; margin: 0 0 6px; display: flex; align-items: baseline; gap: 10px; }
+  h2 .num{ font-family: var(--mono); font-size: 0.85rem; color: var(--accent); }
+  section{ margin-bottom: 52px; }
+  section > p.lead{ color: var(--text-muted); margin: 0 0 20px; max-width: 64ch; }
+  .card{ background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 22px 24px; margin-bottom: 18px; }
+  .card h3{ font-size: 0.92rem; font-weight: 650; margin: 0 0 10px; color: var(--text); }
+  .card p{ margin: 0 0 12px; font-size: 0.92rem; color: var(--text-muted); }
+  .card p:last-child{ margin-bottom: 0; }
+  code.inline{ font-family: var(--mono); font-size: 0.85em; background: var(--key-bg); border: 1px solid var(--key-border); padding: 1px 6px; border-radius: 5px; color: var(--accent); }
+  .codeblock{ position: relative; background: #131418; border: 1px solid var(--border); border-radius: 10px; margin: 4px 0 18px; overflow: hidden; }
+  .codeblock .filename{ font-family: var(--mono); font-size: 0.78rem; color: var(--text-muted); padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .codeblock pre{ margin: 0; padding: 16px; overflow-x: auto; font-family: var(--mono); font-size: 0.83rem; line-height: 1.7; color: #dcd9ef; }
+  .codeblock .comment{ color: #6f7280; }
+  .copy-btn{ font-family: var(--sans); font-size: 0.76rem; color: var(--text-muted); background: transparent; border: 1px solid var(--key-border); border-radius: 6px; padding: 3px 10px; cursor: pointer; }
+  .copy-btn:hover{ color: var(--text); border-color: var(--accent); }
+  .copy-btn.copied{ color: var(--accent-2); border-color: var(--accent-2); }
+  table{ width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th{ text-align: left; font-weight: 600; color: var(--text-muted); font-size: 0.76rem; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  td{ padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td{ border-bottom: none; }
+  kbd{ font-family: var(--mono); font-size: 0.82rem; background: var(--key-bg); border: 1px solid var(--key-border); border-bottom-width: 2px; padding: 2px 7px; border-radius: 6px; color: var(--text); white-space: nowrap; }
+  footer{ margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem; }
+  footer a{ color: var(--accent-2); text-decoration: none; border-bottom: 1px solid rgba(111,176,166,0.35); }
+  footer a:hover{ border-bottom-color: var(--accent-2); }
+  .note{ font-size: 0.85rem; color: var(--text-muted); background: var(--accent-soft); border: 1px solid rgba(169,143,210,0.3); border-radius: 8px; padding: 10px 14px; margin: 0 0 18px; }
+  .note strong{ color: var(--text); }
+  .output-sample{ font-family: var(--mono); font-size: 0.83rem; background: #131418; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; color: #cfd6e0; white-space: pre-wrap; }
+  .output-sample .path{ color: var(--accent-2); }
+</style>
+</head>
+<body>
+<main>
+
+  <header>
+    <h1>config.toml に追加する便利キーバインド</h1>
+    <p>相対パスのコピーと同じ「コマンド展開（<code class="inline">%{...}</code>）＋<code class="inline">:sh</code>」の考え方で組める、他にも登録しておくと便利なキーバインドをまとめました。Helix 自体の標準機能ではなく、すべて自作の設定です。追加先は <code class="inline">~/.config/helix/config.toml</code>。</p>
+  </header>
+
+  <section>
+    <h2><span class="num">01</span>パスをまとめてコピーする一式</h2>
+    <p class="lead">相対パス以外に、絶対パス・ファイル名のみ・ディレクトリのみ・「相対パス:行番号」も <kbd>Space</kbd><kbd>l</kbd> 配下にまとめておくと、用途に応じて使い分けられます。</p>
+
+    <div class="codeblock">
+      <div class="filename">
+        <span>config.toml</span>
+        <button class="copy-btn" data-copy-target="cfg-paths">コピー</button>
+      </div>
+      <pre id="cfg-paths">[keys.normal.space.l]
+r = ":sh printf '%s' '%{buffer_name}' | pbcopy"
+a = ":sh printf '%s' '%{file_path_absolute}' | pbcopy"
+n = ":sh printf '%s' \"$(basename '%{buffer_name}')\" | pbcopy"
+d = ":sh printf '%s' \"$(dirname '%{buffer_name}')\" | pbcopy"
+p = ":sh printf '%s:%s' '%{buffer_name}' '%{cursor_line}' | pbcopy"</pre>
+    </div>
+
+    <div class="card">
+      <h3>各キーの内容</h3>
+      <table>
+        <thead><tr><th>キー</th><th>コピーされる内容</th><th>出力例</th></tr></thead>
+        <tbody>
+          <tr><td><kbd>r</kbd></td><td>相対パス</td><td><code class="inline">src/main.rs</code></td></tr>
+          <tr><td><kbd>a</kbd></td><td>絶対パス</td><td><code class="inline">/Users/you/project/src/main.rs</code></td></tr>
+          <tr><td><kbd>n</kbd></td><td>ファイル名のみ</td><td><code class="inline">main.rs</code></td></tr>
+          <tr><td><kbd>d</kbd></td><td>ディレクトリパス</td><td><code class="inline">src</code></td></tr>
+          <tr><td><kbd>p</kbd></td><td>相対パス:行番号</td><td><code class="inline">src/main.rs:42</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <strong>補足：</strong><code class="inline">%{file_path_absolute}</code> は比較的新しく追加された変数です（2025年11月マージ）。お使いの Helix が古い場合は、代わりに <code class="inline">:sh printf '%s' "$(realpath '%{buffer_name}')" | pbcopy</code> を使ってください（<code class="inline">realpath</code> は Windows 標準では使えません）。
+    </div>
+
+    <div class="note">
+      <strong>補足：</strong>ここでも <code class="inline">echo -n</code> ではなく <code class="inline">printf</code> を使い、余計な改行が入らないようにしています。
+    </div>
+
+    <div class="card">
+      <h3>OS別：パイプ先コマンド</h3>
+      <table>
+        <tbody>
+          <tr><td>macOS</td><td><code class="inline">pbcopy</code></td></tr>
+          <tr><td>Linux（X11）</td><td><code class="inline">xclip -selection clipboard</code></td></tr>
+          <tr><td>Linux（Wayland）</td><td><code class="inline">wl-copy -n</code></td></tr>
+          <tr><td>Windows</td><td><code class="inline">clip</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="color:var(--text-muted); font-size:0.9rem;">使い方：<kbd>Space</kbd> → <kbd>l</kbd> → <kbd>r</kbd> / <kbd>a</kbd> / <kbd>n</kbd> / <kbd>d</kbd> / <kbd>p</kbd></p>
+  </section>
+
+  <section>
+    <h2><span class="num">02</span>選択コードを位置情報つきでコピー</h2>
+    <p class="lead">AI チャットやコードレビューのコメントにコードを貼るとき、「どのファイルの何行目か」を一緒に控えておけると話が早くなります。<code class="inline">:pipe-to</code> を使うと選択範囲を丸ごとコマンドの標準入力として渡せるので、コード自体をキーバインドの文字列に埋め込む必要がなく、引用符が崩れる心配もありません。</p>
+
+    <div class="codeblock">
+      <div class="filename">
+        <span>config.toml（01の設定に追記）</span>
+        <button class="copy-btn" data-copy-target="cfg-selection">コピー</button>
+      </div>
+      <pre id="cfg-selection">[keys.normal.space.l]
+s = ":pipe-to (echo '%{buffer_name}:%{selection_line_start}-%{selection_line_end}'; cat) | pbcopy"</pre>
+    </div>
+
+    <div class="card">
+      <h3>仕組み</h3>
+      <p><code class="inline">echo</code> でパスと行範囲のヘッダー行を作り、続く <code class="inline">cat</code> が選択テキスト（標準入力）をそのまま流し込みます。両方の出力をまとめて <code class="inline">pbcopy</code> に渡すことで、ヘッダー付きのコードがクリップボードに入ります。</p>
+    </div>
+
+    <div class="card">
+      <h3>使い方</h3>
+      <p><kbd>v</kbd> などでコードを選択 → <kbd>Space</kbd> → <kbd>l</kbd> → <kbd>s</kbd>。クリップボードには次のような内容が入ります。</p>
+      <div class="output-sample"><span class="path">src/utils.rs:12-18</span>
+fn add(a: i32, b: i32) -&gt; i32 {
+    a + b
+}</div>
+    </div>
+
+    <p style="color:var(--text-muted); font-size:0.85rem;">pbcopy の部分は 01 の OS別表と同じように置き換えてください。</p>
+  </section>
+
+  <footer>
+    コマンド展開で使える変数の一覧は公式ドキュメントを参照：<a href="https://docs.helix-editor.com/command-line.html" target="_blank" rel="noopener">docs.helix-editor.com/command-line.html</a>
+  </footer>
+
+</main>
+
+<script>
+  document.querySelectorAll('.copy-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var targetId = btn.getAttribute('data-copy-target');
+      var el = document.getElementById(targetId);
+      if(!el) return;
+      var text = el.innerText;
+      var done = function(){
+        var original = btn.textContent;
+        btn.textContent = 'コピーしました';
+        btn.classList.add('copied');
+        setTimeout(function(){
+          btn.textContent = original;
+          btn.classList.remove('copied');
+        }, 1500);
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done).catch(function(){ fallbackCopy(text, done); });
+      } else {
+        fallbackCopy(text, done);
+      }
+    });
+  });
+
+  function fallbackCopy(text, cb){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    if(cb) cb();
+  }
+</script>
+
+</body>
+</html>
