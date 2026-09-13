@@ -253,6 +253,163 @@
   }
   .note-box strong { color: var(--mode-visual); }
 
+  /* ---------- grammar section ---------- */
+  .grammar {
+    background: var(--bg-base);
+    border-bottom: 1px solid var(--border);
+    padding: 38px 20px 44px;
+  }
+  .grammar-inner { max-width: 1100px; margin: 0 auto; }
+
+  .formula {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 26px;
+    margin-bottom: 22px;
+    font-family: var(--font-mono);
+  }
+  .formula .f-count { color: var(--text-faint); font-size: 13px; }
+  .formula .f-verb,
+  .formula .f-noun {
+    font-weight: 700;
+    font-size: 17px;
+    border-bottom: 2px solid currentColor;
+    padding-bottom: 2px;
+  }
+  .formula .f-verb { color: var(--mode-insert); }
+  .formula .f-noun { color: var(--mode-normal); }
+  .formula .f-plus,
+  .formula .f-eq { color: var(--text-faint); font-size: 17px; }
+  .formula .f-result { color: var(--text-primary); font-weight: 700; font-size: 17px; }
+
+  .formula-examples {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+  .formula-examples .ex {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 11px 14px;
+  }
+  .formula-examples kbd { font-size: 15px; padding: 4px 9px; }
+  .formula-examples .v { color: var(--mode-insert); }
+  .formula-examples .n { color: var(--mode-normal); }
+  .formula-examples .o { color: var(--mode-visual); }
+  .ex-text { font-size: 12px; color: var(--text-muted); }
+  .ex-text .v-label { color: var(--mode-insert); }
+  .ex-text .n-label { color: var(--mode-normal); }
+  .ex-text .o-label { color: var(--mode-visual); }
+
+  .grammar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+  }
+  .g-col {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+  }
+  .g-col h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 10px;
+  }
+  .g-col .dot { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+  .g-col .dot.verb { background: var(--mode-insert); }
+  .g-col .dot.noun { background: var(--mode-normal); }
+  .g-col .dot.obj { background: var(--mode-visual); }
+  .g-col table { width: 100%; border-collapse: collapse; }
+  .g-col td { padding: 5px 0; font-size: 12.5px; border-top: 1px solid var(--border); }
+  .g-col tr:first-child td { border-top: none; }
+  .g-col td:first-child { width: 78px; white-space: nowrap; }
+  .g-col td:first-child kbd { font-size: 11px; padding: 1px 6px; }
+  .g-col td:last-child { color: var(--text-muted); }
+
+  .rules-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+  }
+  .rules-list {
+    list-style: none;
+    margin: 0 0 30px;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .rules-list li {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .rules-list li strong { color: var(--text-primary); }
+  .rules-list kbd { font-size: 11px; padding: 1px 6px; }
+
+  .practice-steps h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+  }
+  .practice-steps ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+    display: grid;
+    gap: 8px;
+  }
+  .practice-steps li {
+    counter-increment: step;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--mode-lsp);
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .practice-steps li::before {
+    content: counter(step);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--mode-lsp);
+    flex: none;
+  }
+  .practice-steps code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--text-primary);
+  }
+
   /* ---------- main grid ---------- */
   main {
     max-width: 1100px;
@@ -465,6 +622,103 @@
 
       <div class="note-box">
         <p><strong>完全には再現しづらい機能</strong> — Helixの <kbd>s</kbd>(選択範囲内を正規表現でさらに絞り込む)/ <kbd>S</kbd>(正規表現でサブ選択に分割)は、Kakoune由来の「選択の集合」をどんどん絞り込んでいくモデルに根ざした機能です。Neovimは本質的に選択第一主義のエディタではないため、multicursor.nvim等を入れても同じ操作感を完全には再現できません。近い体験が欲しい場合は <kbd>gr</kbd> 系のLSP参照検索や <kbd>:%s//</kbd> の逐次確認(<kbd>gc</kbd>フラグ)で代替するのが現実的です。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="grammar">
+    <div class="grammar-inner">
+      <h2 class="compare-title">編集の文法<span class="sub">動詞 + 対象 を組み合わせて読む</span></h2>
+
+      <div class="formula">
+        <span class="f-count">[回数]</span>
+        <span class="f-verb">動詞</span>
+        <span class="f-plus">+</span>
+        <span class="f-count">[回数]</span>
+        <span class="f-noun">対象</span>
+        <span class="f-eq">=</span>
+        <span class="f-result">編集</span>
+      </div>
+
+      <div class="formula-examples">
+        <div class="ex">
+          <kbd><span class="v">d</span><span class="n">w</span></kbd>
+          <span class="ex-text"><span class="v-label">削除</span> + <span class="n-label">単語</span> → 単語を削除</span>
+        </div>
+        <div class="ex">
+          <kbd><span class="v">c</span><span class="o">i"</span></kbd>
+          <span class="ex-text"><span class="v-label">変更</span> + <span class="o-label">クォート内側</span> → 文字列の中身を変更</span>
+        </div>
+        <div class="ex">
+          <kbd><span class="v">y</span><span class="n">3j</span></kbd>
+          <span class="ex-text"><span class="v-label">コピー</span> + <span class="n-label">3行下</span> → 3行下までコピー</span>
+        </div>
+        <div class="ex">
+          <kbd><span class="v">gU</span><span class="o">iw</span></kbd>
+          <span class="ex-text"><span class="v-label">大文字化</span> + <span class="o-label">単語内側</span> → 単語を大文字化</span>
+        </div>
+        <div class="ex">
+          <kbd><span class="v">&gt;</span><span class="o">ap</span></kbd>
+          <span class="ex-text"><span class="v-label">インデント</span> + <span class="o-label">段落</span> → 段落全体をインデント</span>
+        </div>
+      </div>
+
+      <div class="grammar-grid">
+        <div class="g-col">
+          <h3><span class="dot verb"></span>動詞(演算子)</h3>
+          <table><tbody>
+            <tr><td><kbd>d</kbd></td><td>delete(削除)</td></tr>
+            <tr><td><kbd>c</kbd></td><td>change(削除して挿入)</td></tr>
+            <tr><td><kbd>y</kbd></td><td>yank(コピー)</td></tr>
+            <tr><td><kbd>&gt;</kbd> / <kbd>&lt;</kbd></td><td>indent / outdent</td></tr>
+            <tr><td><kbd>=</kbd></td><td>自動インデント整形</td></tr>
+            <tr><td><kbd>gu</kbd> / <kbd>gU</kbd></td><td>小文字化 / 大文字化</td></tr>
+            <tr><td><kbd>g~</kbd></td><td>大小反転</td></tr>
+            <tr><td><kbd>!</kbd></td><td>外部コマンドでフィルタ</td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="g-col">
+          <h3><span class="dot noun"></span>対象(モーション)</h3>
+          <table><tbody>
+            <tr><td><kbd>w</kbd> / <kbd>b</kbd></td><td>次/前の単語</td></tr>
+            <tr><td><kbd>0</kbd> / <kbd>$</kbd></td><td>行頭 / 行末</td></tr>
+            <tr><td><kbd>{</kbd> / <kbd>}</kbd></td><td>前/次の段落</td></tr>
+            <tr><td><kbd>gg</kbd> / <kbd>G</kbd></td><td>ファイル先頭/末尾</td></tr>
+            <tr><td><kbd>f{c}</kbd></td><td>指定文字まで</td></tr>
+            <tr><td><kbd>{n}j</kbd></td><td>n行下</td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="g-col">
+          <h3><span class="dot obj"></span>対象(テキストオブジェクト)</h3>
+          <table><tbody>
+            <tr><td><kbd>iw</kbd> / <kbd>aw</kbd></td><td>単語</td></tr>
+            <tr><td><kbd>is</kbd> / <kbd>as</kbd></td><td>文</td></tr>
+            <tr><td><kbd>ip</kbd> / <kbd>ap</kbd></td><td>段落</td></tr>
+            <tr><td><kbd>i"</kbd> / <kbd>a"</kbd></td><td>クォート</td></tr>
+            <tr><td><kbd>i(</kbd> / <kbd>a(</kbd></td><td>括弧</td></tr>
+            <tr><td><kbd>it</kbd> / <kbd>at</kbd></td><td>タグ</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+      <h3 class="rules-title">一貫パターン</h3>
+      <ul class="rules-list">
+        <li><strong>演算子2回 = 行全体</strong> — <kbd>dd</kbd> <kbd>yy</kbd> <kbd>cc</kbd> <kbd>&gt;&gt;</kbd> <kbd>guu</kbd></li>
+        <li><strong>大文字 = 行末までの強化版</strong> — <kbd>D</kbd>=<kbd>d$</kbd>、<kbd>C</kbd>=<kbd>c$</kbd>(例外: <kbd>Y</kbd>=<kbd>yy</kbd>)</li>
+        <li><strong>g プレフィックス = 拡張・別バージョン</strong> — <kbd>gg</kbd> <kbd>ge</kbd> <kbd>gq</kbd> <kbd>gv</kbd></li>
+        <li><strong>[ / ] = 前 / 次</strong> — <kbd>]d</kbd> <kbd>[d</kbd>、<kbd>]f</kbd> <kbd>[f</kbd></li>
+        <li><strong>プレフィックス + 1文字 = 名前付きスロット</strong> — <kbd>"a</kbd>(レジスタ) <kbd>ma</kbd>(マーク) <kbd>qa</kbd>(マクロ)</li>
+      </ul>
+
+      <div class="practice-steps">
+        <h3>習得の実践ステップ</h3>
+        <ol>
+          <li><code>:Tutor</code> — 内蔵のインタラクティブチュートリアル(<code>hx --tutor</code>相当)</li>
+          <li><code>:help motion.txt</code> / <code>:help text-objects</code> — この文法自体がヘルプの構成そのもの</li>
+          <li>回数指定(<code>3dw</code>)とドットリピート(<code>.</code>)を組み合わせて、少ない語彙を使い倒す</li>
+        </ol>
       </div>
     </div>
   </section>
