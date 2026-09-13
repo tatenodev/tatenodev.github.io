@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neovim Cheat Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-base: #14151f;
+    --bg-surface: #1b1d2b;
+    --bg-surface-2: #232637;
+    --bg-row-hover: #262a3d;
+    --border: #2c2f42;
+    --border-soft: #23253600;
+    --text-primary: #e6e8f2;
+    --text-muted: #9498b0;
+    --text-faint: #656a85;
+
+    --mode-normal: #7aa2f7;
+    --mode-insert: #9ece6a;
+    --mode-visual: #bb9af7;
+    --mode-command: #e0af68;
+    --mode-lsp: #7dcfff;
+
+    --font-display: 'Space Grotesk', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-display);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- top "tab bar" ---------- */
+  .tabbar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 20px 0;
+    background: var(--bg-base);
+  }
+  .tab {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text-faint);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    padding: 7px 14px;
+  }
+  .tab.active {
+    color: var(--text-primary);
+    background: var(--bg-surface-2);
+    border-color: var(--border);
+  }
+  .tab .dot { color: var(--mode-lsp); margin-right: 6px; }
+
+  /* ---------- hero ---------- */
+  .hero {
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-surface-2);
+    padding: 44px 20px 26px;
+  }
+  .hero-inner { max-width: 1100px; margin: 0 auto; }
+  .hero h1 {
+    font-size: clamp(28px, 4.2vw, 42px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+  }
+  .hero p.lede {
+    color: var(--text-muted);
+    font-size: 15px;
+    margin: 0 0 26px;
+    max-width: 56ch;
+  }
+
+  /* command-line style filter, echoing :find */
+  .cmdline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 11px 14px;
+    max-width: 480px;
+  }
+  .cmdline .prompt {
+    font-family: var(--font-mono);
+    color: var(--mode-command);
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .cmdline input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 14.5px;
+  }
+  .cmdline input::placeholder { color: var(--text-faint); }
+  .cmdline .hint {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-faint);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    white-space: nowrap;
+  }
+  .result-count {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text-faint);
+  }
+
+  /* ---------- legend / statusline strip ---------- */
+  .statusline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    max-width: 1100px;
+    margin: 22px auto 0;
+    padding: 0 20px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .legend-item .swatch {
+    width: 9px; height: 9px; border-radius: 2px;
+    flex: none;
+  }
+
+  /* ---------- helix comparison ---------- */
+  .compare {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    padding: 34px 20px 40px;
+  }
+  .compare-inner { max-width: 1100px; margin: 0 auto; }
+  .compare-title {
+    font-size: 19px;
+    font-weight: 700;
+    margin: 0 0 18px;
+    letter-spacing: -0.005em;
+  }
+  .compare-title .sub {
+    display: block;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--text-faint);
+    margin-top: 4px;
+  }
+  .paradigm-box {
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--mode-lsp);
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin-bottom: 26px;
+  }
+  .paradigm-box p {
+    margin: 0 0 14px;
+    color: var(--text-primary);
+    font-size: 13.5px;
+  }
+  .paradigm-box strong { color: var(--mode-lsp); }
+  .paradigm-example { display: flex; gap: 30px; flex-wrap: wrap; }
+  .paradigm-example > div { display: flex; align-items: center; gap: 10px; }
+  .ex-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--text-faint);
+    width: 52px;
+    flex: none;
+  }
+  .ex-desc { color: var(--text-muted); font-size: 13px; }
+
+  .compare-tables {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+  }
+  .compare-table-wrap h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+  }
+  table.compare-table { width: 100%; border-collapse: collapse; }
+  .compare-table th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.03em;
+    color: var(--text-faint);
+    font-weight: 500;
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table td {
+    padding: 9px 12px;
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .compare-table tr:hover td { background: var(--bg-row-hover); }
+  .compare-table td:first-child { color: var(--text-muted); width: 34%; }
+  .compare-table td.yes { color: var(--mode-insert); }
+  .compare-table td.need { color: var(--mode-command); }
+
+  /* ---------- main grid ---------- */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 30px 20px 70px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    align-items: start;
+  }
+
+  .pane {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-left-width: 3px;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .pane[data-mode="normal"]  { border-left-color: var(--mode-normal); }
+  .pane[data-mode="insert"]  { border-left-color: var(--mode-insert); }
+  .pane[data-mode="visual"]  { border-left-color: var(--mode-visual); }
+  .pane[data-mode="command"] { border-left-color: var(--mode-command); }
+  .pane[data-mode="lsp"]     { border-left-color: var(--mode-lsp); }
+
+  .pane-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 16px 11px;
+    border-bottom: 1px solid var(--border);
+  }
+  .pane-head h2 {
+    font-size: 14.5px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  .mode-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 3px 6px;
+    border-radius: 3px;
+    color: var(--bg-base);
+  }
+  .mode-badge.normal  { background: var(--mode-normal); }
+  .mode-badge.insert  { background: var(--mode-insert); }
+  .mode-badge.visual  { background: var(--mode-visual); }
+  .mode-badge.command { background: var(--mode-command); }
+  .mode-badge.lsp     { background: var(--mode-lsp); }
+
+  table.kb-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .kb-table tr { border-top: 1px solid var(--border); }
+  .kb-table tr:first-child { border-top: none; }
+  .kb-table tr:hover { background: var(--bg-row-hover); }
+  .kb-table td {
+    padding: 9px 16px;
+    vertical-align: top;
+    font-size: 13.5px;
+  }
+  .kb-table td.key { width: 42%; white-space: nowrap; }
+  .kb-table td.desc { color: var(--text-muted); }
+
+  kbd {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: var(--bg-surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+    white-space: nowrap;
+  }
+
+  .pane.is-hidden { display: none; }
+  .kb-table tr.is-hidden { display: none; }
+
+  .empty-state {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+  .empty-state.show { display: block; }
+
+  footer {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px 50px;
+    color: var(--text-faint);
+    font-size: 12.5px;
+  }
+  footer code {
+    font-family: var(--font-mono);
+    background: var(--bg-surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+
+  a { color: var(--mode-lsp); }
+
+  :focus-visible {
+    outline: 2px solid var(--mode-lsp);
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="tabbar">
+    <div class="tab"><span class="dot">●</span>cheatsheet.md</div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <h1>Neovim Cheat Sheet</h1>
+      <p class="lede">よく使うデフォルトのキーバインドをモード別に整理した早見表。<code style="font-family:var(--font-mono);font-size:13px;background:var(--bg-base);border:1px solid var(--border);border-radius:4px;padding:1px 6px;">/</code> キーでいつでも検索できます。</p>
+
+      <div class="cmdline">
+        <span class="prompt">:find</span>
+        <input id="filter" type="text" placeholder="コマンドや説明で絞り込み…" autocomplete="off" spellcheck="false">
+        <span class="hint">/ でフォーカス</span>
+      </div>
+      <div class="result-count" id="resultCount"></div>
+    </div>
+
+    <div class="statusline">
+      <div class="legend-item"><span class="swatch" style="background:var(--mode-normal)"></span>NORMAL — 移動・履歴・構成</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--mode-insert)"></span>INSERT — 編集</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--mode-visual)"></span>VISUAL — 選択・テキストオブジェクト</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--mode-command)"></span>COMMAND — 検索・置換・Exコマンド</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--mode-lsp)"></span>LSP — 補完・診断(0.10+)</div>
+    </div>
+  </div>
+
+  <section class="compare">
+    <div class="compare-inner">
+      <h2 class="compare-title">Helixとの違い<span class="sub">キー割り当てと編集モデルの主な相違点</span></h2>
+
+      <div class="paradigm-box">
+        <p><strong>編集モデルの順序が逆</strong> — Helixは「対象を選択 → 動作」、Neovimは「動作(演算子) → 対象(モーション)」の順で組み立てます。慣れるまで一番つまずきやすいポイントです。</p>
+        <div class="paradigm-example">
+          <div><span class="ex-label">HELIX</span><kbd>wd</kbd><span class="ex-desc">単語を選択してから削除</span></div>
+          <div><span class="ex-label">NEOVIM</span><kbd>dw</kbd><span class="ex-desc">削除を指定してから対象(単語)を指定</span></div>
+        </div>
+      </div>
+
+      <div class="compare-tables">
+        <div class="compare-table-wrap">
+          <h3>キー対応表</h3>
+          <table class="compare-table">
+            <thead><tr><th>操作</th><th>Helix</th><th>Neovim</th></tr></thead>
+            <tbody>
+              <tr><td>単語を削除</td><td><kbd>wd</kbd></td><td><kbd>dw</kbd></td></tr>
+              <tr><td>単語を変更</td><td><kbd>wc</kbd> / <kbd>ec</kbd></td><td><kbd>cw</kbd></td></tr>
+              <tr><td>1文字削除</td><td><kbd>d</kbd></td><td><kbd>x</kbd></td></tr>
+              <tr><td>行をコピー</td><td><kbd>Xy</kbd></td><td><kbd>yy</kbd></td></tr>
+              <tr><td>元に戻す</td><td><kbd>u</kbd></td><td><kbd>u</kbd></td></tr>
+              <tr><td>やり直す</td><td><kbd>U</kbd></td><td><kbd>Ctrl-r</kbd></td></tr>
+              <tr><td>マクロ記録/再生</td><td><kbd>Q</kbd>記録 / <kbd>q</kbd>再生</td><td><kbd>q</kbd>記録 / <kbd>@</kbd>再生</td></tr>
+              <tr><td>行頭へ</td><td><kbd>gh</kbd></td><td><kbd>0</kbd></td></tr>
+              <tr><td>行頭(非空白)へ</td><td><kbd>gs</kbd></td><td><kbd>^</kbd></td></tr>
+              <tr><td>行末へ</td><td><kbd>gl</kbd></td><td><kbd>$</kbd></td></tr>
+              <tr><td>ファイル末尾へ</td><td><kbd>ge</kbd></td><td><kbd>G</kbd></td></tr>
+              <tr><td>対応する括弧へ</td><td><kbd>mm</kbd></td><td><kbd>%</kbd></td></tr>
+              <tr><td>全置換</td><td><kbd>%s</kbd>→regex→<kbd>c</kbd>→置換</td><td><kbd>:%s/old/new/g</kbd></td></tr>
+              <tr><td>コメント切替</td><td><kbd>Ctrl-c</kbd></td><td><kbd>gcc</kbd></td></tr>
+              <tr><td>関数の中身を選択</td><td><kbd>mif</kbd></td><td><kbd>if</kbd>(要プラグイン)</td></tr>
+              <tr><td>ファジーファイル検索</td><td><kbd>Space f</kbd></td><td>要プラグイン</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="compare-table-wrap">
+          <h3>標準搭載 vs 要プラグイン</h3>
+          <table class="compare-table">
+            <thead><tr><th>機能</th><th>Helix</th><th>Neovim</th></tr></thead>
+            <tbody>
+              <tr><td>LSP</td><td class="yes">標準搭載</td><td class="need">nvim-lspconfig + mason.nvim</td></tr>
+              <tr><td>Tree-sitterハイライト</td><td class="yes">標準搭載</td><td class="need">nvim-treesitter</td></tr>
+              <tr><td>ファジーファインダー</td><td class="yes">標準搭載</td><td class="need">telescope.nvim / fzf-lua 等</td></tr>
+              <tr><td>マルチカーソル</td><td class="yes">標準搭載(選択ベース)</td><td class="need">multicursor.nvim 等</td></tr>
+              <tr><td>コメント切替</td><td class="yes">標準搭載</td><td class="yes">標準搭載(0.10+)</td></tr>
+              <tr><td>Git差分ガター</td><td class="yes">標準搭載</td><td class="need">gitsigns.nvim</td></tr>
+              <tr><td>ファイルツリー</td><td class="need">簡易ピッカーのみ</td><td class="need">nvim-tree.lua / neo-tree.nvim 等</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <div class="grid" id="grid">
+
+      <section class="pane" data-mode="normal">
+        <header class="pane-head"><span class="mode-badge normal">NORMAL</span><h2>移動</h2></header>
+        <table class="kb-table"><tbody>
+          <tr><td class="key"><kbd>h j k l</kbd></td><td class="desc">左・下・上・右に移動</td></tr>
+          <tr><td class="key"><kbd>w</kbd> / <kbd>b</kbd></td><td class="desc">次/前の単語の先頭へ</td></tr>
+          <tr><td class="key"><kbd>e</kbd> / <kbd>ge</kbd></td><td class="desc">次/前の単語の末尾へ</td></tr>
+          <tr><td class="key"><kbd>0</kbd> / <kbd>^</kbd> / <kbd>$</kbd></td><td class="desc">行頭 / 行頭(非空白) / 行末へ</td></tr>
+          <tr><td class="key"><kbd>gg</kbd> / <kbd>G</kbd></td><td class="desc">ファイル先頭 / 末尾へ</td></tr>
+          <tr><td class="key"><kbd>{n}G</kbd></td><td class="desc">n行目へ移動</td></tr>
+          <tr><td class="key"><kbd>{</kbd> / <kbd>}</kbd></td><td class="desc">前/次の段落へ</td></tr>
+          <tr><td class="key"><kbd>f{c}</kbd> / <kbd>F{c}</kbd></td><td class="desc">行内で次/前の文字cへ</td></tr>
+          <tr><td class="key"><kbd>t{c}</kbd> / <kbd>T{c}</kbd></td><td class="desc">文字cの手前まで移動</td></tr>
+          <tr><td class="key"><kbd>;</kbd> / <kbd>,</kbd></td><td class="desc">直前のf/tを同方向/逆方向に繰り返す</td></tr>
+          <tr><td class="key"><kbd>%</kbd></td><td class="desc">対応する括弧へジャンプ</td></tr>
+          <tr><td class="key"><kbd>Ctrl-d</kbd> / <kbd>Ctrl-u</kbd></td><td class="desc">半ページ下/上へスクロール</td></tr>
+          <tr><td class="key"><kbd>zz</kbd> / <kbd>zt</kbd> / <kbd>zb</kbd></td><td class="desc">カーソル行を画面中央/上/下に</td></tr>
+        </tbody></table>
+      </section>
+
+      <section class="pane" data-mode="insert">
+        <header class="pane-head"><span class="mode-badge insert">INSERT</span><h2>編集</h2></header>
+        <table class="kb-table"><tbody>
+          <tr><td class="key"><kbd>i</kbd> / <kbd>I</kbd></td><td class="desc">カーソル位置/行頭から挿入</td></tr>
+          <tr><td class="key"><kbd>a</kbd> / <kbd>A</kbd></td><td class="desc">カーソル次/行末から挿入</td></tr>
+          <tr><td class="key"><kbd>o</kbd> / <kbd>O</kbd></td><td class="desc">下/上に新規行を挿入</td></tr>
+          <tr><td class="key"><kbd>x</kbd> / <kbd>X</kbd></td><td class="desc">カーソル位置/直前の文字を削除</td></tr>
+          <tr><td class="key"><kbd>dd</kbd> / <kbd>yy</kbd></td><td class="desc">行削除 / 行コピー</td></tr>
+          <tr><td class="key"><kbd>D</kbd> / <kbd>Y</kbd></td><td class="desc">カーソルから行末まで削除/コピー</td></tr>
+          <tr><td class="key"><kbd>p</kbd> / <kbd>P</kbd></td><td class="desc">後ろ/前に貼り付け</td></tr>
+          <tr><td class="key"><kbd>u</kbd> / <kbd>Ctrl-r</kbd></td><td class="desc">元に戻す / やり直す</td></tr>
+          <tr><td class="key"><kbd>cc</kbd> / <kbd>cw</kbd></td><td class="desc">行を変更 / 単語を変更</td></tr>
+          <tr><td class="key"><kbd>r{c}</kbd> / <kbd>R</kbd></td><td class="desc">1文字置換 / 置換モード</td></tr>
+          <tr><td class="key"><kbd>J</kbd></td><td class="desc">次の行を結合</td></tr>
+          <tr><td class="key"><kbd>~</kbd></td><td class="desc">大文字小文字を切り替え</td></tr>
+          <tr><td class="key"><kbd>.</kbd></td><td class="desc">直前の変更を繰り返す</td></tr>
+          <tr><td class="key"><kbd>&gt;&gt;</kbd> / <kbd>&lt;&lt;</kbd></td><td class="desc">インデント / インデント解除</td></tr>
+        </tbody></table>
+      </section>
+
+      <section class="pane" data-mode="visual">
+        <header class="pane-head"><span class="mode-badge visual">VISUAL</span><h2>選択</h2></header>
+        <table class="kb-table"><tbody>
+          <tr><td class="key"><kbd>v</kbd></td><td class="desc">文字単位で選択開始</td></tr>
+          <tr><td class="key"><kbd>V</kbd></td><td class="desc">行単位で選択開始</td></tr>
+          <tr><td class="key"><kbd>Ctrl-v</kbd></td><td class="desc">矩形(ブロック)選択開始</td></tr>
+          <tr><td class="key"><kbd>gv</kbd></td><td class="desc">直前の選択範囲を再選択</td></tr>
+          <tr><td class="key"><kbd>o</kbd></td><td class="desc">選択の起点/終点を切り替え</td></tr>
+          <tr><td class="key"><kbd>d</kbd> / <kbd>y</kbd> / <kbd>c</kbd></td><td class="desc">選択範囲を削除/コピー/変更</td></tr>
+          <tr><td class="key"><kbd>&gt;</kbd> / <kbd>&lt;</kbd></td><td class="desc">選択範囲をインデント/解除</td></tr>
+        </tbody></table>
+      </section>
+
+      <section class="pane" data-mode="visual">
+        <header class="pane-head"><span class="mode-badge visual">VISUAL</span><h2>テキストオブジェクト</h2></header>
+        <table class="kb-table"><tbody>
+          <tr><td class="key"><kbd>iw</kbd> / <kbd>aw</kbd></td><td class="desc">単語の内側 / 単語+周辺の空白</td></tr>
+          <tr><td class="key"><kbd>i"</kbd> / <kbd>a"</kbd></td><td class="desc">クォート内側 / クォート含む</td></tr>
+          <tr><td class="key"><kbd>i(</kbd> / <kbd>a(</kbd></td><td class="desc">丸括弧内側 / 含む</td></tr>
+          <tr><td class="key"><kbd>i{</kbd> / <kbd>a{</kbd></td><td class="desc">波括弧内側 / 含む</td></tr>
+          <tr><td class="key"><kbd>ip</kbd> / <kbd>ap</kbd></td><td class="desc">段落の内側 / 含む</td></tr>
+          <tr><td class="key"><kbd>it</kbd> / <kbd>at</kbd></td><td class="desc">タグの内側 / 含む(HTML等)</td></tr>
+        </tbody></table>
+      </section>
+
+      <section class="pane" data-mode="command">
+        <header class="pane-head"><span class="mode-badge command">COMMAND</span><h2>検索・置換</h2></header>
+        <table class="kb-table"><tbody>
+          <tr><td class="key"><kbd>/</kbd> / <kbd>?</kbd></td><td class="desc">前方 / 後方検索</td></tr>
+          <tr><td class="key"><kbd>n</kbd> / <kbd>N</kbd></td><td class="desc">検索を同方向/逆方向に繰り返す</td></tr>
+          <tr><td class="key"><kbd>*</kbd> / <kbd>#</kbd></td><td class="desc">カーソル下の単語を前方/後方検索</td></tr>
+          <tr><td class="key"><kbd>:s/old/new/</kbd></td><td class="desc">現在行を置換</td></tr>
+          <tr><td class="key"><kbd>:%s/old/new/g</kbd></td><td class="desc">ファイル全体を置換</td></tr>
+          <tr><td class="key"><kbd>:%s/old/new/gc</kbd></td><td class="desc">確認しながら全置換</td></tr>
+        </tbody></table>
+      </section>
+
+      <section class="pane" data-mode="normal">
+        <header class="pane-head"><span class="mode-badge normal">NORMAL</span><h2>レジスタ・マーク・マクロ</h2></header>
+        <table class="kb-table"><tbody>
+          <tr><td class="key"><kbd>"ayy</kbd></td><td class="desc">レジスタaに行をヤンク</td></tr>
+          <tr><td class="key"><kbd>"ap</kbd></td><td class="desc">レジスタaから貼り付け</td></tr>
+          <tr><td class="key"><kbd>mx</kbd></td><td class="desc">マークxを設定</td></tr>
+          <tr><td class="key"><kbd>`x</kbd> / <kbd>'x</kbd></td><td class="desc">マークxの正確な位置/行へ移動</td></tr>
+          <tr><td class="key"><kbd>qa ... q</kbd></td><td class="desc">レジスタaにマクロ記録開始/終了</td></tr>
+          <tr><td class="key"><kbd>@a</kbd> / <kbd>@@</kbd></td><td class="desc">マクロaを実行 / 直前のマクロを再実行</td></tr>
+        </tbody></table>
+      </section>
+
+      <section class="pane" data-mode="normal">
+        <header class="pane-head"><span class="mode-badge normal">NORMAL</span><h2>ウィンドウ・タブ・バッファ</h2></header>
+        <table class="kb-table"><tbody>
+          <tr><td class="key"><kbd>Ctrl-w s</kbd> / <kbd>Ctrl-w v</kbd></td><td class="desc">水平/垂直分割</td></tr>
+          <tr><td class="key"><kbd>Ctrl-w h/j/k/l</kbd></td><td class="desc">分割間を移動</td></tr>
+          <tr><td class="key"><kbd>Ctrl-w q</kbd></td><td class="desc">ウィンドウを閉じる</td></tr>
+          <tr><td class="key"><kbd>:tabnew</kbd></td><td class="desc">新規タブを開く</td></tr>
+          <tr><td class="key"><kbd>gt</kbd> / <kbd>gT</kbd></td><td class="desc">次/前のタブへ</td></tr>
+          <tr><td class="key"><kbd>:bn</kbd> / <kbd>:bp</kbd></td><td class="desc">次/前のバッファへ</td></tr>
+          <tr><td class="key"><kbd>:ls</kbd></td><td class="desc">バッファ一覧を表示</td></tr>
+        </tbody></table>
+      </section>
+
+      <section class="pane" data-mode="command">
+        <header class="pane-head"><span class="mode-badge command">COMMAND</span><h2>コマンドライン</h2></header>
+        <table class="kb-table"><tbody>
+          <tr><td class="key"><kbd>:w</kbd></td><td class="desc">保存</td></tr>
+          <tr><td class="key"><kbd>:q</kbd> / <kbd>:q!</kbd></td><td class="desc">終了 / 保存せず終了</td></tr>
+          <tr><td class="key"><kbd>:wq</kbd> / <kbd>:x</kbd></td><td class="desc">保存して終了</td></tr>
+          <tr><td class="key"><kbd>:e {file}</kbd></td><td class="desc">ファイルを開く</td></tr>
+          <tr><td class="key"><kbd>:find {name}</kbd></td><td class="desc">pathからファイル名で開く(要 set path+=**)</td></tr>
+        </tbody></table>
+      </section>
+
+      <section class="pane" data-mode="lsp">
+        <header class="pane-head"><span class="mode-badge lsp">LSP</span><h2>LSPデフォルト (0.10+)</h2></header>
+        <table class="kb-table"><tbody>
+          <tr><td class="key"><kbd>grn</kbd></td><td class="desc">シンボルをリネーム</td></tr>
+          <tr><td class="key"><kbd>gra</kbd></td><td class="desc">コードアクション一覧(Normal/Visual)</td></tr>
+          <tr><td class="key"><kbd>grr</kbd></td><td class="desc">参照箇所を一覧表示</td></tr>
+          <tr><td class="key"><kbd>gri</kbd></td><td class="desc">実装へジャンプ</td></tr>
+          <tr><td class="key"><kbd>gO</kbd></td><td class="desc">バッファ内シンボル一覧</td></tr>
+          <tr><td class="key"><kbd>gq</kbd></td><td class="desc">フォーマット(LSP対応時)</td></tr>
+          <tr><td class="key"><kbd>K</kbd></td><td class="desc">ホバードキュメント表示</td></tr>
+          <tr><td class="key"><kbd>Ctrl-]</kbd></td><td class="desc">定義へジャンプ</td></tr>
+          <tr><td class="key"><kbd>Ctrl-x Ctrl-o</kbd></td><td class="desc">補完メニュー呼び出し(Insert)</td></tr>
+          <tr><td class="key"><kbd>Ctrl-s</kbd></td><td class="desc">シグネチャヘルプ表示(Insert)</td></tr>
+        </tbody></table>
+      </section>
+
+      <section class="pane" data-mode="lsp">
+        <header class="pane-head"><span class="mode-badge lsp">LSP</span><h2>診断デフォルト</h2></header>
+        <table class="kb-table"><tbody>
+          <tr><td class="key"><kbd>]d</kbd> / <kbd>[d</kbd></td><td class="desc">次/前の診断へジャンプ</td></tr>
+          <tr><td class="key"><kbd>]D</kbd> / <kbd>[D</kbd></td><td class="desc">最後/最初の診断へジャンプ</td></tr>
+          <tr><td class="key"><kbd>Ctrl-w d</kbd></td><td class="desc">カーソル行の診断をフロート表示</td></tr>
+        </tbody></table>
+      </section>
+
+      <section class="pane" data-mode="command">
+        <header class="pane-head"><span class="mode-badge command">COMMAND</span><h2>自分で調べる</h2></header>
+        <table class="kb-table"><tbody>
+          <tr><td class="key"><kbd>:help index</kbd></td><td class="desc">全デフォルトコマンドの一覧</td></tr>
+          <tr><td class="key"><kbd>:map</kbd></td><td class="desc">現在アクティブなマッピングを表示</td></tr>
+          <tr><td class="key"><kbd>:verbose map {key}</kbd></td><td class="desc">そのキーがどこで設定されたか確認</td></tr>
+        </tbody></table>
+      </section>
+
+    </div>
+
+    <div class="empty-state" id="emptyState">一致するコマンドが見つかりません</div>
+  </main>
+
+  <footer>
+    プラグイン導入後(nvim-treesitter-textobjects, LSP拡張など)は独自のキーマップが増えます。<code>:verbose map {key}</code> で由来を確認できます。
+  </footer>
+
+<script>
+  const filterInput = document.getElementById('filter');
+  const panes = Array.from(document.querySelectorAll('.pane'));
+  const resultCount = document.getElementById('resultCount');
+  const emptyState = document.getElementById('emptyState');
+  const totalRows = document.querySelectorAll('.kb-table tr').length;
+
+  function applyFilter() {
+    const q = filterInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+    let anyPaneVisible = false;
+
+    panes.forEach(pane => {
+      const rows = Array.from(pane.querySelectorAll('tbody tr'));
+      let paneHasMatch = false;
+
+      rows.forEach(row => {
+        const matches = q === '' || row.textContent.toLowerCase().includes(q);
+        row.classList.toggle('is-hidden', !matches);
+        if (matches) { paneHasMatch = true; visibleCount++; }
+      });
+
+      pane.classList.toggle('is-hidden', !paneHasMatch);
+      if (paneHasMatch) anyPaneVisible = true;
+    });
+
+    emptyState.classList.toggle('show', !anyPaneVisible);
+    resultCount.textContent = q === ''
+      ? `全 ${totalRows} 件`
+      : `${visibleCount} / ${totalRows} 件`;
+  }
+
+  filterInput.addEventListener('input', applyFilter);
+  applyFilter();
+
+  document.addEventListener('keydown', (e) => {
+    const active = document.activeElement;
+    const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA');
+
+    if (e.key === '/' && !isTyping) {
+      e.preventDefault();
+      filterInput.focus();
+    }
+    if (e.key === 'Escape' && active === filterInput) {
+      filterInput.value = '';
+      applyFilter();
+      filterInput.blur();
+    }
+  });
+</script>
+
+</body>
+</html>
